@@ -29,6 +29,19 @@
   var sceneListToggleElement = document.querySelector('#sceneListToggle');
   var autorotateToggleElement = document.querySelector('#autorotateToggle');
   var fullscreenToggleElement = document.querySelector('#fullscreenToggle');
+  var welcomeScreenElement = document.querySelector('#welcomeScreen');
+  var welcomeProjectNameElement = document.querySelector('#welcomeProjectName');
+  var welcomeEnterButtonElement = document.querySelector('#welcomeEnterButton');
+  var vrToggleElement = document.querySelector('#vrToggle');
+  var vrScreenElement = document.querySelector('#vrScreen');
+  var vrPanoLeftElement = document.querySelector('#vrPanoLeft');
+  var vrPanoRightElement = document.querySelector('#vrPanoRight');
+  var vrExitButtonElement = document.querySelector('#vrExitButton');
+  var vrXRContainerElement = document.querySelector('#vrXRContainer');
+
+  // Remember where #pano normally lives so it can be moved back after VR mode.
+  var panoOriginalParent = panoElement.parentNode;
+  var panoOriginalNextSibling = panoElement.nextSibling;
 
   // Detect desktop or mobile mode.
   if (window.matchMedia) {
@@ -70,41 +83,49 @@
   // Initialize viewer.
   var viewer = new Marzipano.Viewer(panoElement, viewerOpts);
 
-  // Create scenes.
-  var scenes = data.scenes.map(function(data) {
+  // Creates a scene (source + geometry + view) on a given Marzipano viewer.
+  // Used for the main tour and, in VR mode, for the mirrored right-eye viewer.
+  function createSceneOnViewer(targetViewer, sceneData) {
     var urlPrefix = "tiles";
     var source = Marzipano.ImageUrlSource.fromString(
-      urlPrefix + "/" + data.id + "/{z}/{f}/{y}/{x}.jpg",
-      { cubeMapPreviewUrl: urlPrefix + "/" + data.id + "/preview.jpg" });
-    var geometry = new Marzipano.CubeGeometry(data.levels);
+      urlPrefix + "/" + sceneData.id + "/{z}/{f}/{y}/{x}.jpg",
+      { cubeMapPreviewUrl: urlPrefix + "/" + sceneData.id + "/preview.jpg" });
+    var geometry = new Marzipano.CubeGeometry(sceneData.levels);
 
-    var limiter = Marzipano.RectilinearView.limit.traditional(data.faceSize, 100*Math.PI/180, 120*Math.PI/180);
-    var view = new Marzipano.RectilinearView(data.initialViewParameters, limiter);
+    var limiter = Marzipano.RectilinearView.limit.traditional(sceneData.faceSize, 100*Math.PI/180, 120*Math.PI/180);
+    var view = new Marzipano.RectilinearView(sceneData.initialViewParameters, limiter);
 
-    var scene = viewer.createScene({
+    var scene = targetViewer.createScene({
       source: source,
       geometry: geometry,
       view: view,
       pinFirstLevel: true
     });
 
-    // Create link hotspots.
-    data.linkHotspots.forEach(function(hotspot) {
-      var element = createLinkHotspotElement(hotspot);
-      scene.hotspotContainer().createHotspot(element, { yaw: hotspot.yaw, pitch: hotspot.pitch });
-    });
-
-    // Create info hotspots.
-    data.infoHotspots.forEach(function(hotspot) {
-      var element = createInfoHotspotElement(hotspot);
-      scene.hotspotContainer().createHotspot(element, { yaw: hotspot.yaw, pitch: hotspot.pitch });
-    });
-
     return {
-      data: data,
+      data: sceneData,
       scene: scene,
       view: view
     };
+  }
+
+  // Create scenes.
+  var scenes = data.scenes.map(function(sceneData) {
+    var entry = createSceneOnViewer(viewer, sceneData);
+
+    // Create link hotspots.
+    sceneData.linkHotspots.forEach(function(hotspot) {
+      var element = createLinkHotspotElement(hotspot);
+      entry.scene.hotspotContainer().createHotspot(element, { yaw: hotspot.yaw, pitch: hotspot.pitch });
+    });
+
+    // Create info hotspots.
+    sceneData.infoHotspots.forEach(function(hotspot) {
+      var element = createInfoHotspotElement(hotspot);
+      entry.scene.hotspotContainer().createHotspot(element, { yaw: hotspot.yaw, pitch: hotspot.pitch });
+    });
+
+    return entry;
   });
 
   // Set up autorotate, if enabled.
@@ -182,10 +203,13 @@
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
   }
 
+  var currentSceneEntry = null;
+
   function switchScene(scene) {
     stopAutorotate();
     scene.view.setParameters(scene.data.initialViewParameters);
     scene.scene.switchTo();
+    currentSceneEntry = scene;
     startAutorotate();
     updateSceneName(scene);
     updateSceneList(scene);
@@ -384,6 +408,428 @@
       }
     }
     return null;
+  }
+
+  // Welcome / splash screen.
+  if (welcomeProjectNameElement) {
+    welcomeProjectNameElement.innerHTML = sanitize(data.name || '');
+  }
+  if (welcomeEnterButtonElement && welcomeScreenElement) {
+    welcomeEnterButtonElement.addEventListener('click', function() {
+      welcomeScreenElement.classList.add('hidden');
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // VR / Cardboard mode: side-by-side stereo view controlled by the phone's
+  // gyroscope (DeviceOrientation API). Marzipano has no built-in VR mode,
+  // so this mirrors the current scene into a second viewer for the right
+  // eye and drives the real view's yaw/pitch from device orientation.
+  // ---------------------------------------------------------------------
+
+  var vrActive = false;
+  var vrRightViewer = null;
+  var vrRightSceneEntry = null;
+  var vrSyncRafId = null;
+  var vrOrientationHandler = null;
+  var vrOrientationCalibration = null;
+
+  function enterVR() {
+    if (vrActive || !currentSceneEntry) {
+      return;
+    }
+    vrActive = true;
+
+    stopAutorotate();
+    document.body.classList.add('vr-mode');
+    vrToggleElement.classList.add('enabled');
+
+    // Move the live, interactive panorama into the left-eye pane.
+    vrPanoLeftElement.appendChild(panoElement);
+
+    // Build a lightweight mirror viewer for the right eye, showing the
+    // same scene. It has no controls of its own; it just follows the
+    // left eye's view parameters every frame.
+    vrRightViewer = new Marzipano.Viewer(vrPanoRightElement, viewerOpts);
+    vrRightSceneEntry = createSceneOnViewer(vrRightViewer, currentSceneEntry.data);
+    vrRightSceneEntry.scene.switchTo();
+
+    var syncRightEye = function() {
+      if (!vrActive) {
+        return;
+      }
+      if (vrRightSceneEntry && currentSceneEntry) {
+        vrRightSceneEntry.view.setParameters(currentSceneEntry.view.parameters());
+      }
+      vrSyncRafId = window.requestAnimationFrame(syncRightEye);
+    };
+    syncRightEye();
+
+    if (screenfull.enabled) {
+      screenfull.request(vrScreenElement);
+    }
+
+    enableGyro();
+  }
+
+  function exitVR() {
+    if (!vrActive) {
+      return;
+    }
+    vrActive = false;
+
+    disableGyro();
+
+    if (vrSyncRafId) {
+      window.cancelAnimationFrame(vrSyncRafId);
+      vrSyncRafId = null;
+    }
+
+    if (vrRightViewer) {
+      vrPanoRightElement.innerHTML = '';
+      vrRightViewer = null;
+      vrRightSceneEntry = null;
+    }
+
+    // Put the panorama back where it normally lives in the page.
+    panoOriginalParent.insertBefore(panoElement, panoOriginalNextSibling);
+
+    document.body.classList.remove('vr-mode');
+    vrToggleElement.classList.remove('enabled');
+
+    if (screenfull.enabled && screenfull.isFullscreen) {
+      screenfull.exit();
+    }
+
+    startAutorotate();
+  }
+
+  // ---------------------------------------------------------------------
+  // WebXR (Meta Quest and other headsets): true head-tracked stereo VR,
+  // built from the original equirectangular panoramas. This is what
+  // powers the VR button on Quest's browser, which supports the WebXR
+  // Device API but — unlike a phone — does not fire DeviceOrientation
+  // events, so the cardboard mode above can't track head movement there.
+  //
+  // Expects one equirectangular JPG per scene at:
+  //   pano/<scene-id>.jpg   e.g. pano/0-recibidor.jpg
+  // (the "id" values already used in data.js).
+  //
+  // three.js is only downloaded if the browser actually reports WebXR
+  // support, so regular phone/desktop visitors never pay that cost.
+  // ---------------------------------------------------------------------
+
+  var xrSupported = false;
+  var threeLoadPromise = null;
+  var xrRenderer = null;
+  var xrScene = null;
+  var xrCamera = null;
+  var xrSession = null;
+
+  if (navigator.xr && navigator.xr.isSessionSupported) {
+    navigator.xr.isSessionSupported('immersive-vr').then(function(supported) {
+      xrSupported = supported;
+      if (supported) {
+        document.body.classList.add('xr-supported');
+      }
+    }).catch(function() {
+      xrSupported = false;
+    });
+  }
+
+  function loadThree() {
+    if (threeLoadPromise) {
+      return threeLoadPromise;
+    }
+    threeLoadPromise = new Promise(function(resolve, reject) {
+      if (window.THREE) {
+        resolve(window.THREE);
+        return;
+      }
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js';
+      script.onload = function() { resolve(window.THREE); };
+      script.onerror = function() { reject(new Error('No se pudo cargar three.js')); };
+      document.head.appendChild(script);
+    });
+    return threeLoadPromise;
+  }
+
+  function equirectUrlForScene(sceneData) {
+    return 'pano/' + sceneData.id + '.jpg';
+  }
+
+  function enterXR() {
+    if (!currentSceneEntry || xrSession) {
+      return;
+    }
+
+    loadThree().then(function(THREE) {
+      stopAutorotate();
+
+      xrRenderer = new THREE.WebGLRenderer({ antialias: true });
+      xrRenderer.setPixelRatio(window.devicePixelRatio);
+      xrRenderer.setSize(window.innerWidth, window.innerHeight);
+      xrRenderer.xr.enabled = true;
+      xrRenderer.outputEncoding = THREE.sRGBEncoding;
+      vrXRContainerElement.appendChild(xrRenderer.domElement);
+      vrXRContainerElement.classList.add('active');
+
+      xrScene = new THREE.Scene();
+      xrCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+      // Inverted sphere: the camera sits at the center looking outward
+      // at the inside surface, which is where the equirectangular
+      // panorama gets mapped.
+      var geometry = new THREE.SphereGeometry(500, 60, 40);
+      geometry.scale(-1, 1, 1);
+
+      var texture = new THREE.TextureLoader().load(
+        equirectUrlForScene(currentSceneEntry.data),
+        undefined,
+        undefined,
+        function() {
+          console.error('No se encontró la imagen equirectangular: ' +
+            equirectUrlForScene(currentSceneEntry.data));
+        }
+      );
+      texture.encoding = THREE.sRGBEncoding;
+
+      var material = new THREE.MeshBasicMaterial({ map: texture });
+      xrScene.add(new THREE.Mesh(geometry, material));
+
+      xrRenderer.setAnimationLoop(function() {
+        xrRenderer.render(xrScene, xrCamera);
+      });
+
+      window.addEventListener('resize', onXRResize);
+
+      navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor'] })
+        .then(function(session) {
+          xrSession = session;
+          xrRenderer.xr.setReferenceSpaceType('local');
+          xrRenderer.xr.setSession(session);
+
+          vrToggleElement.classList.add('enabled');
+          document.body.classList.add('vr-mode');
+
+          session.addEventListener('end', cleanupXR);
+        })
+        .catch(function(err) {
+          console.error('No se pudo iniciar la sesión de VR:', err);
+          cleanupXR();
+        });
+    }).catch(function(err) {
+      console.error(err);
+    });
+  }
+
+  function onXRResize() {
+    if (!xrRenderer || !xrCamera) {
+      return;
+    }
+    xrCamera.aspect = window.innerWidth / window.innerHeight;
+    xrCamera.updateProjectionMatrix();
+    xrRenderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function exitXR() {
+    if (xrSession) {
+      xrSession.end();
+    } else {
+      cleanupXR();
+    }
+  }
+
+  function cleanupXR() {
+    window.removeEventListener('resize', onXRResize);
+
+    if (xrRenderer) {
+      xrRenderer.setAnimationLoop(null);
+      if (xrRenderer.domElement && xrRenderer.domElement.parentNode) {
+        xrRenderer.domElement.parentNode.removeChild(xrRenderer.domElement);
+      }
+      xrRenderer.dispose();
+    }
+    xrRenderer = null;
+    xrScene = null;
+    xrCamera = null;
+    xrSession = null;
+
+    vrXRContainerElement.classList.remove('active');
+    vrToggleElement.classList.remove('enabled');
+    document.body.classList.remove('vr-mode');
+
+    startAutorotate();
+  }
+
+  vrToggleElement.addEventListener('click', function() {
+    // Real head-tracked VR when the browser supports it (Meta Quest and
+    // other headsets); otherwise fall back to the cardboard split-screen.
+    if (xrSupported) {
+      if (xrSession) {
+        exitXR();
+      } else {
+        enterXR();
+      }
+      return;
+    }
+    if (vrActive) {
+      exitVR();
+    } else {
+      enterVR();
+    }
+  });
+
+  vrExitButtonElement.addEventListener('click', exitVR);
+
+  document.addEventListener('keydown', function(event) {
+    if (vrActive && (event.key === 'Escape' || event.keyCode === 27)) {
+      exitVR();
+    }
+  });
+
+  if (screenfull.enabled) {
+    screenfull.on('change', function() {
+      if (vrActive && !screenfull.isFullscreen) {
+        exitVR();
+      }
+    });
+  }
+
+  // --- Gyroscope control -------------------------------------------------
+
+  function enableGyro() {
+    if (typeof DeviceOrientationEvent === 'undefined') {
+      // No device orientation support (e.g. desktop). The split-screen
+      // view still works and can be looked around with mouse/touch drag.
+      return;
+    }
+
+    var start = function() {
+      vrOrientationCalibration = null;
+      vrOrientationHandler = function(event) {
+        if (event.alpha === null && event.beta === null && event.gamma === null) {
+          return;
+        }
+        handleDeviceOrientation(event);
+      };
+      window.addEventListener('deviceorientation', vrOrientationHandler);
+    };
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+ requires an explicit permission prompt from a user gesture,
+      // which is why this call happens inside the VR button's click handler.
+      DeviceOrientationEvent.requestPermission().then(function(state) {
+        if (state === 'granted') {
+          start();
+        }
+      }).catch(function() {
+        // Permission denied/unsupported; split-screen still works via drag.
+      });
+    } else {
+      start();
+    }
+  }
+
+  function disableGyro() {
+    if (vrOrientationHandler) {
+      window.removeEventListener('deviceorientation', vrOrientationHandler);
+      vrOrientationHandler = null;
+    }
+    vrOrientationCalibration = null;
+  }
+
+  function handleDeviceOrientation(event) {
+    if (!currentSceneEntry) {
+      return;
+    }
+
+    var direction = deviceOrientationToDirection(event);
+
+    if (!vrOrientationCalibration) {
+      // Calibrate so the current view stays put the instant the gyro turns
+      // on; further head movement is then applied as a relative offset.
+      // (If left/right ever feels inverted on a given device, flip the
+      // sign on the yaw line below.)
+      var params = currentSceneEntry.view.parameters();
+      vrOrientationCalibration = {
+        yaw: direction.yaw,
+        pitch: direction.pitch,
+        viewYaw: params.yaw,
+        viewPitch: params.pitch
+      };
+      return;
+    }
+
+    currentSceneEntry.view.setParameters({
+      yaw: vrOrientationCalibration.viewYaw + (direction.yaw - vrOrientationCalibration.yaw),
+      pitch: vrOrientationCalibration.viewPitch + (direction.pitch - vrOrientationCalibration.pitch)
+    });
+  }
+
+  // Converts a deviceorientation event into a { yaw, pitch } looking
+  // direction, accounting for the current screen rotation. This follows
+  // the standard W3C DeviceOrientation -> quaternion conversion used
+  // across WebVR/cardboard implementations (equivalent to three.js'
+  // DeviceOrientationControls), reimplemented here without a 3D library.
+  function deviceOrientationToDirection(event) {
+    var alpha = event.alpha ? toRad(event.alpha) : 0;
+    var beta = event.beta ? toRad(event.beta) : 0;
+    var gamma = event.gamma ? toRad(event.gamma) : 0;
+    var orient = toRad(getScreenOrientationAngle());
+
+    var q = quatFromEulerYXZ(beta, alpha, -gamma);
+    q = quatMultiply(q, QUAT_WORLD_TO_SCREEN);
+    q = quatMultiply(q, quatFromAxisAngleZ(-orient));
+
+    // Forward vector (0, 0, -1) rotated by the orientation quaternion.
+    var vx = -2 * (q.w * q.y + q.z * q.x);
+    var vy =  2 * (q.w * q.x - q.z * q.y);
+    var vz = -1 + 2 * (q.x * q.x + q.y * q.y);
+
+    return {
+      yaw: Math.atan2(vx, -vz),
+      pitch: Math.asin(Math.max(-1, Math.min(1, vy)))
+    };
+  }
+
+  function getScreenOrientationAngle() {
+    if (window.screen && window.screen.orientation && typeof window.screen.orientation.angle === 'number') {
+      return window.screen.orientation.angle;
+    }
+    return window.orientation || 0;
+  }
+
+  function toRad(deg) {
+    return deg * Math.PI / 180;
+  }
+
+  // Minimal quaternion helpers (kept dependency-free on purpose).
+  var QUAT_WORLD_TO_SCREEN = { x: -Math.SQRT1_2, y: 0, z: 0, w: Math.SQRT1_2 };
+
+  function quatMultiply(a, b) {
+    return {
+      x: a.w*b.x + a.x*b.w + a.y*b.z - a.z*b.y,
+      y: a.w*b.y - a.x*b.z + a.y*b.w + a.z*b.x,
+      z: a.w*b.z + a.x*b.y - a.y*b.x + a.z*b.w,
+      w: a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z
+    };
+  }
+
+  function quatFromEulerYXZ(x, y, z) {
+    var c1 = Math.cos(x/2), c2 = Math.cos(y/2), c3 = Math.cos(z/2);
+    var s1 = Math.sin(x/2), s2 = Math.sin(y/2), s3 = Math.sin(z/2);
+    return {
+      x: s1*c2*c3 + c1*s2*s3,
+      y: c1*s2*c3 - s1*c2*s3,
+      z: c1*c2*s3 - s1*s2*c3,
+      w: c1*c2*c3 + s1*s2*s3
+    };
+  }
+
+  function quatFromAxisAngleZ(angle) {
+    return { x: 0, y: 0, z: Math.sin(angle/2), w: Math.cos(angle/2) };
   }
 
   // Display the initial scene.
