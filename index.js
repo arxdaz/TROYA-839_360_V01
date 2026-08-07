@@ -169,6 +169,13 @@
   // Set handler for scene switch.
   scenes.forEach(function(scene) {
     var el = document.querySelector('#sceneList .scene[data-id="' + scene.data.id + '"]');
+    if (!el) {
+      // No existe un <a class="scene" data-id="..."> en index.html para esta
+      // escena de data.js. Revisa que ambos archivos vengan del mismo
+      // export de Marzipano (los data-id deben coincidir exactamente).
+      console.warn('DAZ tour: no se encontró el botón de sceneList para la escena "' + scene.data.id + '". Revisa que index.html tenga <a class="scene" data-id="' + scene.data.id + '">.');
+      return;
+    }
     el.addEventListener('click', function() {
       switchScene(scene);
       // On mobile, hide scene list after selecting a scene.
