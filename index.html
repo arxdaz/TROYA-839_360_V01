@@ -10,17 +10,6 @@
 </head>
 <body class="multiple-scenes view-control-buttons">
 
-<div id="welcomeScreen">
-  <div id="welcomeContent">
-    <img id="welcomeLogo" src="img/daz-logo.png" alt="DAZ Arquitectura + Construcción">
-    <div id="welcomeDivider"></div>
-    <h1 id="welcomeProjectName"></h1>
-    <p id="welcomeSubtitle">Recorrido virtual 360°</p>
-    <a href="javascript:void(0)" id="welcomeEnterButton">Entrar al recorrido</a>
-    <p id="welcomeFirm">DAZ Arquitectura + Construcción</p>
-  </div>
-</div>
-
 <div id="pano"></div>
 
 <div id="sceneList">
@@ -36,6 +25,10 @@
     
       <a href="javascript:void(0)" class="scene" data-id="2-cocina">
         <li class="text">COCINA</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="3-recamara">
+        <li class="text">RECAMARA</li>
       </a>
     
   </ul>
@@ -78,28 +71,6 @@
 <a href="javascript:void(0)" id="viewOut" class="viewControlButton viewControlButton-6">
   <img class="icon" src="img/minus.png">
 </a>
-
-<a href="javascript:void(0)" id="vrToggle" title="Modo VR">
-  <svg class="icon vr-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="6" width="20" height="12" rx="4" stroke="white" stroke-width="1.6"/>
-    <circle cx="8" cy="12" r="1.6" fill="white"/>
-    <circle cx="16" cy="12" r="1.6" fill="white"/>
-    <path d="M10.3 15.2c0.5 0.5 1.1 0.8 1.7 0.8s1.2-0.3 1.7-0.8" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-    <circle class="vr-icon-xr-badge" cx="20" cy="5" r="3.4" fill="#fff"/>
-  </svg>
-</a>
-
-<div id="vrScreen">
-  <div id="vrPanoLeft"></div>
-  <div id="vrPanoRight"></div>
-  <div id="vrDivider"></div>
-  <a href="javascript:void(0)" id="vrExitButton" title="Salir de VR">&#10005;</a>
-  <div id="vrRotateHint">Gira tu dispositivo a modo horizontal para la mejor experiencia VR</div>
-</div>
-
-<!-- Full head-tracked WebXR view (Meta Quest and other headsets).
-     Populated at runtime with three.js; empty/hidden otherwise. -->
-<div id="vrXRContainer"></div>
 
 <script src="vendor/screenfull.min.js" ></script>
 <script src="vendor/bowser.min.js" ></script>

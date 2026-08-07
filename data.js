@@ -24,8 +24,8 @@ var APP_DATA = {
       ],
       "faceSize": 2048,
       "initialViewParameters": {
-        "yaw": -0.28707095554576334,
-        "pitch": 0.5096678943178752,
+        "yaw": -0.021562742762366582,
+        "pitch": 0.10577480139503947,
         "fov": 1.1280412618726754
       },
       "linkHotspots": [
@@ -36,8 +36,8 @@ var APP_DATA = {
           "target": "1-sala"
         },
         {
-          "yaw": -0.5758091115308837,
-          "pitch": 0.14769453312230496,
+          "yaw": -0.599553520041594,
+          "pitch": 0.12383216160809951,
           "rotation": 0,
           "target": "2-cocina"
         },
@@ -174,8 +174,8 @@ var APP_DATA = {
       },
       "linkHotspots": [
         {
-          "yaw": -1.9522242591332901,
-          "pitch": 0.4080334424758334,
+          "yaw": -1.9535892231722762,
+          "pitch": 0.4077705853071052,
           "rotation": 0,
           "target": "0-recibidor"
         }

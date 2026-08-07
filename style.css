@@ -1,11 +1,3 @@
-:root {
-  /* DAZ Arquitectura — paleta monocromática */
-  --daz-font: "Century Gothic", "CenturyGothic", "Questrial", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --daz-radius: 10px;
-  --daz-radius-sm: 6px;
-  --daz-shadow: 0 4px 18px rgba(0,0,0,0.35);
-}
-
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -30,20 +22,10 @@ html, body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  font-family: var(--daz-font);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
-  letter-spacing: 0.02em;
   background-color: #000;
   color: #fff;
-}
-
-/* Íconos PNG originales vienen en azul-gris; este filtro los deja
-   blancos para que combinen con la paleta monocromática sin
-   necesitar reemplazar los archivos de imagen. Si algún ícono se ve
-   raro (p.ej. ya es blanco de origen), quita el filtro en esa regla. */
-.icon {
-  filter: brightness(0) invert(1);
-  opacity: 0.92;
 }
 
 a, a:hover, a:active, a:visited {
@@ -64,23 +46,23 @@ a, a:hover, a:active, a:visited {
   position: absolute;
   top: 0;
   left: 0;
-  right: 80px;
+  right: 40px;
   height: 40px;
   text-align: center;
 }
 
 .mobile #titleBar {
   height: 50px;
-  right: 100px;
+  right: 50px;
 }
 
 /* If there is a fullscreen button the title bar must make space for it */
 body.fullscreen-enabled #titleBar {
-  right: 120px;
+  right: 80px;
 }
 
 body.fullscreen-enabled.mobile #titleBar {
-  right: 150px;
+  right: 100px;
 }
 
 /* If there are multiple scenes the title bar must make space for the scene list toggle */
@@ -96,14 +78,9 @@ body.multiple-scenes.mobile #titleBar {
   width: 100%;
   height: 100%;
   line-height: 30px;
-  padding: 5px 16px;
-  background-color: #141414;
-  background-color: rgba(20,20,20,0.88);
-  border-radius: 0 0 var(--daz-radius) var(--daz-radius);
-  text-transform: uppercase;
-  font-weight: 400;
-  letter-spacing: 0.15em;
-  font-size: 14px;
+  padding: 5px;
+  background-color: rgb(58,68,84);
+  background-color: rgba(58,68,84,0.8);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -126,15 +103,8 @@ body.multiple-scenes.mobile #titleBar {
   width: 40px;
   height: 40px;
   padding: 5px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
-  border-radius: 0 0 0 var(--daz-radius);
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch #fullscreenToggle:hover {
-  background-color: rgba(70,70,70,0.95);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 .mobile #fullscreenToggle {
@@ -183,15 +153,8 @@ body.fullscreen-enabled #fullscreenToggle {
   width: 40px;
   height: 40px;
   padding: 5px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
-  border-radius: 0 0 0 var(--daz-radius);
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch #autorotateToggle:hover {
-  background-color: rgba(70,70,70,0.95);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 .mobile #autorotateToggle {
@@ -237,204 +200,6 @@ body.fullscreen-enabled.mobile #autorotateToggle {
   display: none;
 }
 
-#vrToggle {
-  display: block;
-  position: absolute;
-  top: 0;
-  right: 40px;
-  width: 40px;
-  height: 40px;
-  padding: 8px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
-  border-radius: 0 0 0 var(--daz-radius);
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch #vrToggle:hover {
-  background-color: rgba(70,70,70,0.95);
-}
-
-.mobile #vrToggle {
-  width: 50px;
-  height: 50px;
-  right: 50px;
-}
-
-body.fullscreen-enabled #vrToggle {
-  right: 80px;
-}
-
-body.fullscreen-enabled.mobile #vrToggle {
-  right: 100px;
-}
-
-#vrToggle .vr-icon {
-  display: block;
-  width: 100%;
-  height: 100%;
-  opacity: 0.92;
-}
-
-#vrToggle.enabled {
-  background-color: rgba(255,255,255,0.92);
-}
-
-#vrToggle.enabled .vr-icon rect,
-#vrToggle.enabled .vr-icon path {
-  stroke: #141414;
-}
-
-#vrToggle.enabled .vr-icon circle {
-  fill: #141414;
-}
-
-/* VR / cardboard split-screen mode */
-
-body.vr-mode #titleBar,
-body.vr-mode #sceneList,
-body.vr-mode #sceneListToggle,
-body.vr-mode #autorotateToggle,
-body.vr-mode #fullscreenToggle,
-body.vr-mode .viewControlButton,
-body.vr-mode #welcomeScreen {
-  display: none !important;
-}
-
-#vrScreen {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 15000;
-  background-color: #000;
-}
-
-body.vr-mode #vrScreen {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-#vrPanoLeft,
-#vrPanoRight {
-  position: relative;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-}
-
-#vrPanoLeft #pano {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-#vrDivider {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100%;
-  background-color: rgba(255,255,255,0.15);
-  z-index: 15001;
-  pointer-events: none;
-}
-
-#vrExitButton {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
-  line-height: 34px;
-  text-align: center;
-  border-radius: 50%;
-  background-color: rgba(20,20,20,0.75);
-  color: #fff;
-  font-size: 16px;
-  z-index: 15002;
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch #vrExitButton:hover {
-  background-color: rgba(46,46,46,0.92);
-}
-
-#vrRotateHint {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 15003;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 40px;
-  background-color: rgba(0,0,0,0.92);
-  color: #fff;
-  font-family: var(--daz-font);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 14px;
-}
-
-@media (max-width: 900px) and (orientation: portrait) {
-  body.vr-mode #vrRotateHint {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-  }
-}
-
-/* WebXR (Meta Quest, etc.). While a headset session is active the
-   browser renders straight to the headset; this container just holds
-   the required <canvas> and gives a black backdrop on the flat screen. */
-#vrXRContainer {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 16000;
-  background-color: #000;
-}
-
-#vrXRContainer.active {
-  display: block;
-}
-
-#vrXRContainer canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* Only show the headset icon as a distinct "real VR" affordance when
-   the browser actually reports WebXR support (Quest Browser, etc.). */
-#vrToggle .vr-icon-xr-badge {
-  display: none;
-}
-
-body.xr-supported #vrToggle .vr-icon-xr-badge {
-  display: block;
-}
-
 #sceneListToggle {
   position: absolute;
   top: 0;
@@ -442,15 +207,8 @@ body.xr-supported #vrToggle .vr-icon-xr-badge {
   width: 40px;
   height: 40px;
   padding: 5px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
-  border-radius: 0 0 var(--daz-radius) 0;
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch #sceneListToggle:hover {
-  background-color: rgba(70,70,70,0.95);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 .mobile #sceneListToggle {
@@ -515,11 +273,8 @@ body.xr-supported #vrToggle .vr-icon-xr-badge {
 
 #sceneList .scenes {
   width: 100%;
-  background-color: #141414;
-  background-color: rgba(20,20,20,0.88);
-  border-radius: 0 var(--daz-radius) var(--daz-radius) 0;
-  box-shadow: var(--daz-shadow);
-  overflow: hidden;
+  background-color: rgb(58,68,84);
+  background-color: rgba(58,68,84,0.8);
 }
 
 .mobile #sceneList {
@@ -558,16 +313,6 @@ body.xr-supported #vrToggle .vr-icon-xr-badge {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  font-weight: 400;
-}
-
-#sceneList .scene {
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .mobile #sceneList .scene .text {
@@ -575,13 +320,13 @@ body.xr-supported #vrToggle .vr-icon-xr-badge {
 }
 
 .no-touch #sceneList .scene:hover {
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 #sceneList .scene.current {
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 /* Hide scene list when only a single scene exists */
@@ -623,19 +368,16 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
 
   margin-left: 3px;
 
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 16px;
 
   max-width: 300px;
 
-  padding: 8px 12px;
+  padding: 8px 10px;
 
-  border-radius: var(--daz-radius-sm);
-  box-shadow: var(--daz-shadow);
+  border-radius: 5px;
 
-  background-color: #141414;
-  background-color: rgba(20,20,20,0.88);
+  background-color: rgb(58,68,84);
+  background-color: rgba(58,68,84,0.8);
 
   color: #fff;
 
@@ -711,7 +453,7 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  background-color: #2e2e2e;
+  background-color: rgb(103,115,131);
   cursor: pointer;
   -webkit-transition: width 0.3s ease-in-out 0.5s,
                       border-radius 0.3s ease-in-out 0.5s;
@@ -797,9 +539,6 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
 .info-hotspot .info-hotspot-title {
   display: inline-block;
   vertical-align: middle;
-  text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.1em;
 
   -moz-user-select: text;
   -webkit-user-select: text;
@@ -814,7 +553,7 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   height: 40px;
   width: 40px;
   border-top-right-radius: 5px;
-  background-color: #000000;
+  background-color: rgb(78,88,104);
   visibility: hidden;
   -ms-transform: perspective(200px) rotateY(90deg);
   -webkit-transform: perspective(200px) rotateY(90deg);
@@ -861,7 +600,7 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   top: 40px;
   left: 0;
   padding: 10px;
-  background-color: #141414;
+  background-color: rgb(58,68,84);
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
   overflow-y: auto;
@@ -943,8 +682,8 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   right: 10px;
   width: auto;
   height: 50px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
   opacity: 0;
   -webkit-transition: opacity 0.3s ease-in-out 0.2s;
   transition: opacity 0.3s ease-in-out 0.2s;
@@ -1000,8 +739,8 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   right: 0;
   width: 50px;
   height: 50px;
-  background-color: #000000;
-  background-color: rgba(0,0,0,0.92);
+  background-color: rgb(78,88,104);
+  background-color: rgba(78,88,104,0.8);
   cursor: pointer;
 }
 
@@ -1018,8 +757,8 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   left: 10px;
   right: 10px;
   padding: 10px;
-  background-color: #141414;
-  background-color: rgba(20,20,20,0.88);
+  background-color: rgb(58,68,84);
+  background-color: rgba(58,68,84,0.8);
   overflow-y: auto;
   opacity: 0;
   -webkit-transition: opacity 0.3s ease-in-out;
@@ -1047,15 +786,8 @@ body.single-scene #sceneList, body.single-scene #sceneListToggle {
   width: 40px;
   height: 40px;
   padding: 5px;
-  background-color: #2e2e2e;
-  background-color: rgba(46,46,46,0.92);
-  border-radius: var(--daz-radius-sm) var(--daz-radius-sm) 0 0;
-  -webkit-transition: background-color 0.2s ease-in-out;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.no-touch .viewControlButton:hover {
-  background-color: rgba(70,70,70,0.95);
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
 }
 
 body.view-control-buttons .viewControlButton {
@@ -1095,121 +827,4 @@ body.view-control-buttons .viewControlButton {
 }
 .viewControlButton-6 {
   margin-left: 105px;
-}
-
-/* Welcome / splash screen */
-
-#welcomeScreen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 20000;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  background-color: #000;
-  background-image: radial-gradient(circle at 50% 40%, #1c1c1c 0%, #000 75%);
-  opacity: 1;
-  visibility: visible;
-  -webkit-transition: opacity 0.6s ease-in-out, visibility 0s 0s;
-  transition: opacity 0.6s ease-in-out, visibility 0s 0s;
-}
-
-#welcomeScreen.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  -webkit-transition: opacity 0.6s ease-in-out, visibility 0s 0.6s;
-  transition: opacity 0.6s ease-in-out, visibility 0s 0.6s;
-}
-
-#welcomeContent {
-  text-align: center;
-  padding: 0 30px;
-  max-width: 480px;
-
-  -moz-user-select: text;
-  -webkit-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
-#welcomeLogo {
-  width: 180px;
-  max-width: 60vw;
-  height: auto;
-  /* El logo original es azul marino sobre transparente; se invierte
-     a blanco para que combine con la pantalla de bienvenida oscura.
-     Si ya subes una versión blanca del logo, quita este filtro. */
-  filter: brightness(0) invert(1);
-  opacity: 0.96;
-}
-
-.mobile #welcomeLogo {
-  width: 140px;
-}
-
-#welcomeDivider {
-  width: 40px;
-  height: 1px;
-  margin: 22px auto;
-  background-color: rgba(255,255,255,0.35);
-}
-
-#welcomeProjectName {
-  margin: 0;
-  font-family: var(--daz-font);
-  font-weight: 400;
-  font-size: 34px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #fff;
-}
-
-.mobile #welcomeProjectName {
-  font-size: 26px;
-}
-
-#welcomeSubtitle {
-  margin: 10px 0 34px;
-  font-size: 13px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
-}
-
-#welcomeEnterButton {
-  display: inline-block;
-  padding: 14px 38px;
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 999px;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #fff;
-  cursor: pointer;
-  background-color: transparent;
-  -webkit-transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out;
-  transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out;
-}
-
-.no-touch #welcomeEnterButton:hover {
-  background-color: #fff;
-  color: #000;
-}
-
-#welcomeFirm {
-  margin: 34px 0 0;
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
 }
