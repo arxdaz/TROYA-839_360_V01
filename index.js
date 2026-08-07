@@ -389,4 +389,13 @@
   // Display the initial scene.
   switchScene(scenes[0]);
 
+  // Set handler for the intro overlay's "Entrar al recorrido" button.
+  var introOverlayElement = document.querySelector('#introOverlay');
+  var introOverlayEnterElement = document.querySelector('#introOverlayEnter');
+  if (introOverlayEnterElement) {
+    introOverlayEnterElement.addEventListener('click', function() {
+      introOverlayElement.classList.add('hidden');
+    });
+  }
+
 })();
