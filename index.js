@@ -189,10 +189,21 @@
     startAutorotate();
     updateSceneName(scene);
     updateSceneList(scene);
+    updateVrSyncState(scene);
   }
 
   function updateSceneName(scene) {
     sceneNameElement.innerHTML = sanitize(scene.data.name);
+  }
+
+  // Expose the active scene id so vr.js can sync the WebXR viewer
+  // to whatever scene is currently on screen when VR mode is entered.
+  window.__currentTourSceneId = null;
+  function updateVrSyncState(scene) {
+    window.__currentTourSceneId = scene.data.id;
+    if (typeof window.__onTourSceneChange === 'function') {
+      window.__onTourSceneChange(scene.data.id);
+    }
   }
 
   function updateSceneList(scene) {

@@ -183,6 +183,137 @@ body.fullscreen-enabled #fullscreenToggle {
   display: none;
 }
 
+#vrToggle {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 64px;
+  width: 44px;
+  height: 44px;
+  padding: 7px;
+  background-color: #2e2e2e;
+  background-color: rgba(46,46,46,0.78);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  -webkit-transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease;
+}
+
+.no-touch #vrToggle:hover {
+  background-color: #141414;
+  background-color: rgba(20,20,20,0.95);
+}
+
+.mobile #vrToggle {
+  top: 12px;
+  right: 74px;
+  width: 50px;
+  height: 50px;
+}
+
+body.fullscreen-enabled #vrToggle {
+  right: 118px;
+}
+
+body.fullscreen-enabled.mobile #vrToggle {
+  right: 136px;
+}
+
+/* Only reveal the button once WebXR support has been confirmed by vr.js */
+body.vr-supported #vrToggle {
+  display: block;
+}
+
+#vrToggle .icon {
+  width: 30px;
+  height: 30px;
+  color: #fff;
+}
+
+/* Hide the whole normal-view UI while a WebXR session is active; the
+   headset renders its own floating menu instead. */
+body.vr-active #pano,
+body.vr-active #titleBar,
+body.vr-active #sceneList,
+body.vr-active #sceneListToggle,
+body.vr-active #autorotateToggle,
+body.vr-active #fullscreenToggle,
+body.vr-active #vrToggle,
+body.vr-active .viewControlButton {
+  display: none !important;
+}
+
+#vrContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  background-color: #000;
+  display: none;
+}
+
+body.vr-active #vrContainer {
+  display: block;
+}
+
+#vrCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vrNotice {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 60;
+  background-color: rgba(0,0,0,0.72);
+  text-align: center;
+}
+
+.vrNotice.visible {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+.vrNotice-content {
+  max-width: 320px;
+  padding: 28px 24px;
+  background-color: #1a1a1a;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.vrNotice-content p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #eee;
+}
+
+.vrNotice-close {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 9px 22px;
+  background-color: #fff;
+  color: #111 !important;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
 #autorotateToggle {
   display: block;
   position: absolute;
